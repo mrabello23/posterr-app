@@ -1,4 +1,4 @@
-import TestRepository from "../infra/repositories/TestRepository";
+import TestRepository from "../infra/repositories/UserRepository";
 
 export default class UseCaseTest {
   constructor(readonly testRepository: TestRepository) {}

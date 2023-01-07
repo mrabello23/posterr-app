@@ -1,2 +1,1 @@
-export * from "./router1";
-export * from "./router2";
+export * from "./v1/user-router";

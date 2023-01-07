@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response, Router } from "express";
 import NodeCache from "node-cache";
 
-const router1 = Router();
+const userRouterV1 = Router();
 
 const cache = new NodeCache({ stdTTL: 10, checkperiod: 20 }); // Numbers in seconds
 
@@ -24,14 +24,22 @@ const validateCache = (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-router1.get("/route_1/teste", validateCache, (req: Request, res: Response) => {
-  console.log(req.query);
-  console.log(req.params);
+userRouterV1.post("/v1/user/profile", validateCache, (req: Request, res: Response) => {
+  console.log("body", req.body);
 
   // TODO: implement controller layer
-  cache.set("cache|test|key|" + req.params.id, "cached value");
+  cache.set("cache|test|key|" + req.body.id, "cached value");
 
   res.send({ success: true, message: "Ok" });
 });
 
-export { router1 };
+userRouterV1.get("/v1/user/:username", validateCache, (req: Request, res: Response) => {
+  console.log("params", req.params);
+
+  // TODO: implement controller layer
+  cache.set("cache|test|key|" + req.params.username, "cached value");
+
+  res.send({ success: true, message: "Ok" });
+});
+
+export { userRouterV1 };
