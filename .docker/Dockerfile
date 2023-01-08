@@ -12,6 +12,4 @@ RUN npm run build
 
 EXPOSE 3000
 
-RUN echo "npm start" > app.sh && chmod a+x app.sh
-
-CMD ["sh","app.sh"]
+CMD ["npm","start"]
