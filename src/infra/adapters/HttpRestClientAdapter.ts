@@ -13,15 +13,15 @@ export default class HttpRestClientAdapter implements HttpRestClient {
     data: D,
     config?: HttpRestClientConfig,
   ): Promise<R> {
-    if (!config) return await this.httpLib.post(url, data, config);
-    return await this.httpLib.post(url, data);
+    if (!config) return this.httpLib.post(url, data, config);
+    return this.httpLib.post(url, data);
   }
 
   async get<T = any, R = HttpRestClientResponse<T>>(
     url: string,
     config?: HttpRestClientConfig,
   ): Promise<R> {
-    if (!config) return await this.httpLib.post(url);
-    return await this.httpLib.post(url, config);
+    if (!config) return this.httpLib.post(url);
+    return this.httpLib.post(url, config);
   }
 }

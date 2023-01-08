@@ -1,10 +1,10 @@
-DROP TYPE IF EXISTS "public"."user";
+DROP TYPE IF EXISTS "user";
 
-CREATE TABLE "public"."user" (
+CREATE TABLE "user" (
     "id" uuid PRIMARY KEY NOT NULL,
-    "name" varchar(200),
-    "email" varchar(150) UNIQUE NOT NULL,
-    "username" varchar(14) UNIQUE NOT NULL,
-    "userpass" varchar(20),
+    "name" character varying(200),
+    "email" character varying(150) UNIQUE NOT NULL,
+    "username" character varying(14) UNIQUE NOT NULL,
+    "userpass" character varying(20),
     "created_at" timestamp without time zone DEFAULT CURRENT_TIMESTAMP
 );

@@ -1,47 +1,42 @@
-export type User = {
+export type UserEntity = {
   id: string;
   name: string;
   email: string;
   username: string;
-  userpass: string;
-  createdAt: string;
+  created_at: string;
 };
 
-export default class Test {
-  private _id: string;
-  private _name: string;
-  private _email: string;
-  private _username: string;
-  private _userpass: string;
-  private _created_at: string;
+export default class User {
+  private id: string;
+  private name: string;
+  private email: string;
+  private username: string;
+  private createdAt: string;
+  createdAtFormatted = "";
 
-  constructor(data: User) {
-    const { id, name, email, username, userpass, createdAt } = data;
+  constructor(data: UserEntity) {
+    const { id, name, email, username, created_at } = data;
 
-    this._id = id;
-    this._name = name;
-    this._email = email;
-    this._username = username;
-    this._userpass = userpass;
-    this._created_at = createdAt;
+    this.id = id;
+    this.name = name;
+    this.email = email;
+    this.username = username;
+    this.createdAt = created_at;
   }
 
   getId() {
-    return this._id;
+    return this.id;
   }
   getName() {
-    return this._name;
+    return this.name;
   }
   getEmail() {
-    return this._email;
+    return this.email;
   }
   getUsername() {
-    return this._username;
-  }
-  getUserpass() {
-    return this._userpass;
+    return this.username;
   }
   getCreatedAt() {
-    return this._created_at;
+    return this.createdAt;
   }
 }

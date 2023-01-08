@@ -11,5 +11,19 @@
     "sourceType": "module"
   },
   "plugins": ["@typescript-eslint", "eslint-plugin-import-helpers"],
-  "rules": {}
+  "rules": {
+    "quotes": "off",
+    "camelcase": "warn",
+    "linebreak-style": "off",
+    "no-console": "off",
+    "object-curly-newline": "off",
+    "lines-between-class-members": "off",
+    "no-underscore-dangle": "warn",
+    "no-explicit-any": "off",
+    "no-useless-constructor": "warn",
+    "class-methods-use-this": "off",
+    "import/prefer-default-export": "off",
+    "import/no-unresolved": "off",
+    "import/extensions": "off"
+  }
 }
