@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import compression from "compression";
 
 import { PORT } from "./envs";
-import { userRouterV1 } from "./routes";
+import { userRouterV1, postRouterV1 } from "./routes";
 
 const app = express();
 
@@ -12,6 +12,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(compression());
 
 app.use(userRouterV1);
+app.use(postRouterV1);
 
 app.get("/", (req: Request, res: Response) => {
   console.log("Server Up and Running.");
