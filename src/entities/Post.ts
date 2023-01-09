@@ -7,6 +7,18 @@ export type PostEntity = {
   created_at: string;
 };
 
+export type GetPostFeedRequestData = {
+  feed: string;
+  filter?: { userId?: string; from?: string; to?: string };
+};
+
+export type GetPostRequestData = {
+  page: number;
+  userId?: string;
+  from?: string;
+  to?: string;
+};
+
 export default class Post {
   private id: string;
   private text: string;
@@ -45,3 +57,15 @@ export default class Post {
     return this.repost;
   }
 }
+
+export type Feed = {
+  posts: Post[];
+  previousPage: number;
+  nextPage: number;
+};
+
+export type PostFeed = {
+  feed: Feed;
+  userId?: string;
+  totalPosts?: number;
+};

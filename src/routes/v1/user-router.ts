@@ -1,14 +1,17 @@
 import { NextFunction, Request, Response, Router } from "express";
 import NodeCache from "node-cache";
-import PostgreAdapter from "../../infra/adapters/PostgreAdapter";
+
+import { database } from "../connection";
+import PostRepositoryPostgreAdapter from "../../infra/adapters/PostRepositoryPostgreAdapter";
 import UserRepositoryPostgreAdapter from "../../infra/adapters/UserRepositoryPostgreAdapter";
 import GetUserProfileUseCase from "../../usecases/GetUserProfileUseCase";
+import GetPostFeedUseCase from "../../usecases/GetPostFeedUseCase";
 
 const userRouterV1 = Router();
 
 const cache = new NodeCache({ stdTTL: 10, checkperiod: 20 }); // Numbers in seconds
 
-const database = new PostgreAdapter();
+const postRepository = new PostRepositoryPostgreAdapter(database);
 const userRepository = new UserRepositoryPostgreAdapter(database);
 
 const validateCache = (req: Request, res: Response, next: NextFunction) => {
@@ -22,14 +25,14 @@ const validateCache = (req: Request, res: Response, next: NextFunction) => {
       const cacheData = cache.get(cacheKeys.UserProfileCache);
       console.log("cache", cacheData);
 
-      return res.send({ success: true, message: "Ok Data cached" });
+      return res.send({ success: true, message: "Ok Data cached", data: cacheData });
     }
 
     if (cache.has(cacheKeys.UserByUsernameCache)) {
       const cacheData = cache.get(cacheKeys.UserByUsernameCache);
       console.log("cache", cacheData);
 
-      return res.send({ success: true, message: "Ok Data cached" });
+      return res.send({ success: true, message: "Ok Data cached", data: cacheData });
     }
 
     return next();
@@ -42,12 +45,19 @@ const validateCache = (req: Request, res: Response, next: NextFunction) => {
 userRouterV1.post("/v1/user/profile", validateCache, async (req: Request, res: Response) => {
   console.log("body", req.body);
 
-  const useCase = new GetUserProfileUseCase(userRepository);
-  const profile = await useCase.execute(req.body.user);
+  const getUserProfileUseCase = new GetUserProfileUseCase(userRepository);
+  const profile = await getUserProfileUseCase.execute(req.body.user);
 
-  cache.set(`user|profile|${req.body.user}`, "cached value");
+  const getPostFeedUseCase = new GetPostFeedUseCase(postRepository);
+  const posts = await getPostFeedUseCase.execute({
+    feed: "user_profile",
+    filter: { userId: req.body.user },
+  });
 
-  res.send({ success: true, message: "Ok", data: profile });
+  const returnData = { profile, posts };
+  cache.set(`user|profile|${req.body.user}`, returnData);
+
+  res.send({ success: true, message: "Ok", data: returnData });
 });
 
 userRouterV1.get("/v1/user/:username", validateCache, async (req: Request, res: Response) => {
