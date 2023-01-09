@@ -64,28 +64,98 @@ export default class GetPostFeedUseCase {
     const { filter } = data;
     const FIRST_PAGE = 1;
     const POSTS_LIMIT = 10;
-    let posts: Post[];
 
     if (filter?.from || filter?.to) {
-      posts = await this.postRepository.getAllByCreatedAt(
-        {
-          from: filter.from,
-          to: filter.to,
-        },
-        { page: FIRST_PAGE.toString(), size: POSTS_LIMIT.toString() },
-      );
-    } else {
-      posts = await this.postRepository.getAll({
-        page: FIRST_PAGE.toString(),
-        size: POSTS_LIMIT.toString(),
-      });
+      if (filter?.userId) {
+        return this.getPostsByUserIdAndPostedDate(
+          filter.userId,
+          FIRST_PAGE,
+          POSTS_LIMIT,
+          filter.from,
+          filter.to,
+        );
+      }
+
+      return this.getPostsByPostedDate(FIRST_PAGE, POSTS_LIMIT, filter.from, filter.to);
     }
+
+    // Only Mine filter
+    if (filter?.userId) {
+      return this.getOnlyMinePosts(filter.userId, FIRST_PAGE, POSTS_LIMIT);
+    }
+
+    // All posts
+    return this.getAllPosts(FIRST_PAGE, POSTS_LIMIT);
+  }
+
+  private async getPostsByPostedDate(
+    page: number,
+    limit: number,
+    from?: string,
+    to?: string,
+  ): Promise<PostFeed> {
+    const posts = await this.postRepository.getAllByCreatedAt(
+      { from, to },
+      { page: page.toString(), size: limit.toString() },
+    );
 
     return {
       feed: {
         posts,
-        previousPage: FIRST_PAGE - 1,
-        nextPage: FIRST_PAGE + 1,
+        previousPage: page - 1,
+        nextPage: page + 1,
+      },
+    };
+  }
+
+  private async getPostsByUserIdAndPostedDate(
+    userId: string,
+    page: number,
+    limit: number,
+    from?: string,
+    to?: string,
+  ): Promise<PostFeed> {
+    const posts = await this.postRepository.getAllByUserIdAndCreatedAt(
+      userId,
+      { from, to },
+      { page: page.toString(), size: limit.toString() },
+    );
+
+    return {
+      feed: {
+        posts,
+        previousPage: page - 1,
+        nextPage: page + 1,
+      },
+    };
+  }
+
+  private async getOnlyMinePosts(userId: string, page: number, limit: number): Promise<PostFeed> {
+    const posts = await this.postRepository.getAllByUserId(userId, {
+      page: page.toString(),
+      size: limit.toString(),
+    });
+
+    return {
+      feed: {
+        posts,
+        previousPage: page - 1,
+        nextPage: page + 1,
+      },
+    };
+  }
+
+  private async getAllPosts(page: number, limit: number): Promise<PostFeed> {
+    const posts = await this.postRepository.getAll({
+      page: page.toString(),
+      size: limit.toString(),
+    });
+
+    return {
+      feed: {
+        posts,
+        previousPage: page - 1,
+        nextPage: page + 1,
       },
     };
   }
