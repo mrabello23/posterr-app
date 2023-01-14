@@ -10,7 +10,8 @@
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
-  "plugins": ["@typescript-eslint", "eslint-plugin-import-helpers"],
+  "ignorePatterns": ["*.json"],
+  "plugins": ["@typescript-eslint"],
   "rules": {
     "camelcase": "warn",
     "max-len": "warn",

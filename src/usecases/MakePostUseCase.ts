@@ -6,6 +6,12 @@ import PostRepository from "../infra/repositories/PostRepository";
 // - Reposting: Users can repost other users' posts, limited to original posts and quote posts, not reposts
 // - Quote-post: Users can repost other users' posts and leave a comment limited to original and reposts, not quote-posts
 
+enum PostType {
+  POST = "post",
+  REPOST = "repost",
+  QUOTEPOST = "quote-post",
+}
+
 export default class MakePostUseCase {
   constructor(readonly postRepository: PostRepository) {}
 
