@@ -1,7 +1,9 @@
 import { randomUUID } from "crypto";
 
-import Post, { CreatePostRequestData, PostEntity } from "../entities/Post";
+import { CreatePostRequestData } from "../entities/Post";
+import Quote, { QuoteEntity } from "../entities/Quote";
 import PostRepository from "../infra/repositories/PostRepository";
+import QuoteRepository from "../infra/repositories/QuoteRepository";
 
 // Constraints:
 // - A user is not allowed to post more than 5 posts in one day (including reposts and quote posts)
@@ -9,25 +11,56 @@ import PostRepository from "../infra/repositories/PostRepository";
 // - Quote-post: Users can repost other users' posts and leave a comment limited to original and reposts, not quote-posts
 
 export default class QuotePostUseCase {
-  constructor(readonly postRepository: PostRepository) {}
+  constructor(
+    private readonly quoteRepository: QuoteRepository,
+    private readonly postRepository: PostRepository,
+  ) {}
 
-  async execute(data: CreatePostRequestData): Promise<void> {
+  async execute(data: { userId: string; text: string; postId: string }): Promise<void> {
     const { text, userId, postId } = data;
 
-    await this.validatePost(userId, text, postId);
+    await this.validateQuotePostData(data);
 
-    const dataToSave: PostEntity = {
+    const dataToSave: QuoteEntity = {
       id: randomUUID(),
       text,
       user_id: userId,
       original_post_id: postId,
-      created_at: new Date().toDateString(),
     };
 
-    await this.postRepository.save(new Post(dataToSave));
+    await this.quoteRepository.save(new Quote(dataToSave));
   }
 
-  private async validatePost(userId: string, text: string, postId?: string): Promise<void> {
+  private async validateQuotePostData(data: {
+    userId: string;
+    text: string;
+    postId: string;
+  }): Promise<void> {
+    const { text, userId, postId } = data;
+
     if (text.length > 777) throw new Error("Your Post is too long. Max 777 characters.");
+
+    const quote = await this.quoteRepository.getById(postId);
+    if (quote.getId()) throw new Error("You cannot quote a quoted post.");
+
+    const date = new Date();
+    const from = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()} 00:00:00`;
+    const to = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()} 23:59:59`;
+
+    const posts = await this.postRepository.getAllByUserIdAndCreatedAt(
+      userId,
+      { from, to },
+      { page: "1", size: "5" },
+    );
+
+    const quotes = await this.quoteRepository.getAllByUserIdAndCreatedAt(
+      userId,
+      { from, to },
+      { page: "1", size: "5" },
+    );
+
+    if (posts.length + quotes.length === 5) {
+      throw new Error("You reached the daily post limit (up to 5).");
+    }
   }
 }

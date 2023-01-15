@@ -1,8 +1,10 @@
 import { Feed, GetPostFeedRequestData, PostType } from "../entities/Post";
+import { CreateQuoteRequestData } from "../entities/Quote";
 import PostRepository from "../infra/repositories/PostRepository";
 import QuoteRepository from "../infra/repositories/QuoteRepository";
 import CreatePostUseCase from "../usecases/CreatePostUseCase";
 import GetPostFeedUseCase from "../usecases/GetPostFeedUseCase";
+import QuotePostUseCase from "../usecases/QuotePostUseCase";
 
 export default class PostController {
   constructor(
@@ -26,8 +28,12 @@ export default class PostController {
     await createPostUseCase.execute({ text, userId, postId, type: PostType.REPOST });
   }
 
-  async doQuotePost(): Promise<void> {
+  async doQuotePost(data: CreateQuoteRequestData): Promise<void> {
     console.log("PostController.doQuotePost");
+    const { userId, text, postId } = data;
+
+    const createPostUseCase = new QuotePostUseCase(this.quoteRepository, this.postRepository);
+    await createPostUseCase.execute({ text, userId, postId });
   }
 
   async getHomepage(data: GetPostFeedRequestData): Promise<Feed> {

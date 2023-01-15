@@ -83,7 +83,11 @@ postRouterV1.post("/v1/repost", async (req: Request, res: Response) => {
 
 postRouterV1.post("/v1/quote-post", async (req: Request, res: Response) => {
   try {
-    controller.doQuotePost();
+    await controller.doQuotePost({
+      userId: req.body.user,
+      text: req.body.text,
+      postId: req.body.original_post_id,
+    });
 
     res.send({ success: true, message: "Ok" });
   } catch (error) {

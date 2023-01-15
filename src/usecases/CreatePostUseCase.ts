@@ -18,7 +18,7 @@ export default class CreatePostUseCase {
   async execute(data: CreatePostRequestData): Promise<void> {
     const { type, text, userId, postId } = data;
 
-    await this.validatePostData(userId, text);
+    await this.validatePostData(userId, text, postId);
 
     if (type === PostType.POST) {
       await this.createPost(userId, text);
@@ -27,8 +27,13 @@ export default class CreatePostUseCase {
 
     await this.createRepost(userId, text, postId);
   }
-  private async validatePostData(userId: string, text: string): Promise<void> {
+  private async validatePostData(userId: string, text: string, postId?: string): Promise<void> {
     if (text.length > 777) throw new Error("Your Post is too long. Max 777 characters.");
+
+    if (postId) {
+      const post = await this.postRepository.getById(postId);
+      if (post.getRepost()) throw new Error("You cannot repost a reposted post.");
+    }
 
     const date = new Date();
     const from = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()} 00:00:00`;

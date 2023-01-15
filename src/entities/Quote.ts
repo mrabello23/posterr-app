@@ -3,15 +3,15 @@ export type QuoteEntity = {
   text: string;
   user_id: string;
   original_post_id: string;
-  created_at: string;
+  created_at?: string;
 };
 
 export default class Quote {
   private id: string;
   private text: string;
   private userId: string;
-  private originalPostId: string | undefined;
-  private createdAt: string;
+  private originalPostId: string;
+  private createdAt: string | undefined;
 
   constructor(data: QuoteEntity) {
     const { id, text, user_id, created_at, original_post_id } = data;
@@ -39,3 +39,9 @@ export default class Quote {
     return this.originalPostId;
   }
 }
+
+export type CreateQuoteRequestData = {
+  text: string;
+  userId: string;
+  postId: string;
+};
