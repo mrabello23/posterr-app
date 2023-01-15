@@ -1,49 +1,43 @@
-import { NextFunction, Request, Response } from "express";
-import NodeCache from "node-cache";
-
-import { PostFeed } from "../entities/Post";
+import { Feed } from "../entities/Post";
 import User from "../entities/User";
-import GetPostFeedUseCase from "../usecases/GetPostFeedUseCase";
+
+import PostRepository from "../infra/repositories/PostRepository";
+import QuoteRepository from "../infra/repositories/QuoteRepository";
+import UserRepository from "../infra/repositories/UserRepository";
+
+import GetUserProfileFeedUseCase from "../usecases/GetUserProfileFeedUseCase";
 import GetUserProfileUseCase from "../usecases/GetUserProfileUseCase";
+
+declare type UserProfile = {
+  profile: User;
+  feed: Feed;
+  totalPosts: number | undefined;
+};
 
 export default class UserController {
   constructor(
-    private readonly getUserProfileUseCase: GetUserProfileUseCase,
-    private readonly getPostFeedUseCase: GetPostFeedUseCase,
-    private readonly cache: NodeCache,
+    private readonly postRepository: PostRepository,
+    private readonly userRepository: UserRepository,
+    private readonly quoteRepository: QuoteRepository,
   ) {}
 
-  async getUserProfile(userId: string): Promise<{ profile: User; posts: PostFeed }> {
-    const profile = await this.getUserProfileUseCase.execute(userId);
+  async getUserProfile(userId: string): Promise<UserProfile> {
+    console.log("UserController.getUserProfile");
 
-    const posts = await this.getPostFeedUseCase.execute({
-      feed: "user_profile",
-      filter: { userId },
-    });
+    const getUserProfileUseCase = new GetUserProfileUseCase(this.userRepository);
+    const profile = await getUserProfileUseCase.execute(userId);
 
-    return { profile, posts };
+    const getUserProfileFeedUseCase = new GetUserProfileFeedUseCase(
+      this.postRepository,
+      this.quoteRepository,
+    );
+    const posts = await getUserProfileFeedUseCase.execute({ userId });
+
+    return { profile, feed: posts.feed, totalPosts: posts.totalPosts };
   }
 
-  validateCache(req: Request, res: Response, next: NextFunction) {
-    const cacheKeys = {
-      UserProfileCache: `user|profile|${req.body.id}`,
-      UserByUsernameCache: `user|usename|${req.params.username}`,
-    };
-
-    if (this.cache.has(cacheKeys.UserProfileCache)) {
-      const cacheData = this.cache.get(cacheKeys.UserProfileCache);
-      console.log("cache", cacheData);
-
-      return res.send({ success: true, message: "Ok Data cached", data: cacheData });
-    }
-
-    if (this.cache.has(cacheKeys.UserByUsernameCache)) {
-      const cacheData = this.cache.get(cacheKeys.UserByUsernameCache);
-      console.log("cache", cacheData);
-
-      return res.send({ success: true, message: "Ok Data cached", data: cacheData });
-    }
-
-    return next();
+  async getUserData(username: string): Promise<User> {
+    console.log("UserController.getUserData");
+    return this.userRepository.getByUsername(username);
   }
 }

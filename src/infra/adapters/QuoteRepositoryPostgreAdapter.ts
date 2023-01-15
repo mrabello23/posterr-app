@@ -1,34 +1,34 @@
 import Database from "../Database";
-import Post from "../../entities/Post";
-import PostRepository, { Pagination, DateFilter } from "../repositories/PostRepository";
+import Quote from "../../entities/Quote";
+import QuoteRepository, { Pagination, DateFilter } from "../repositories/QuoteRepository";
 
-export default class PostRepositoryPostgreAdapter implements PostRepository {
+export default class QuoteRepositoryPostgreAdapter implements QuoteRepository {
   constructor(readonly db: Database) {}
 
-  async getById(id: string): Promise<Post> {
-    let data = await this.db.query("SELECT * FROM public.post WHERE id = $1", [id]);
+  async getById(id: string): Promise<Quote> {
+    let data = await this.db.query("SELECT * FROM public.quotes WHERE id = $1", [id]);
 
     if (data.length > 0) [data] = data;
-    return new Post(data);
+    return new Quote(data);
   }
 
-  async save(data: Post): Promise<void> {
+  async save(data: Quote): Promise<void> {
     await this.db.query(
-      "INSERT INTO public.post(id, text, user_id, repost, original_post_id) VALUES($1, $2, $3, $4, $5)",
-      [data.getId(), data.getText(), data.getUserId(), data.getRepost(), data.getOriginalPostId()],
+      "INSERT INTO public.quotes(id, text, user_id, original_post_id) VALUES($1, $2, $3, $4)",
+      [data.getId(), data.getText(), data.getUserId(), data.getOriginalPostId()],
     );
   }
 
-  async getAllByUserId(userId: string, pagination: Pagination): Promise<Post[]> {
+  async getAllByUserId(userId: string, pagination: Pagination): Promise<Quote[]> {
     const data = await this.db.query(
-      `SELECT * FROM public.post WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET (($3 - 1) * $2)`,
+      `SELECT * FROM public.quotes WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET (($3 - 1) * $2)`,
       [userId, pagination.size, pagination.page],
     );
 
     return data;
   }
 
-  async getAllByCreatedAt(date: DateFilter, pagination: Pagination): Promise<Post[]> {
+  async getAllByCreatedAt(date: DateFilter, pagination: Pagination): Promise<Quote[]> {
     let whereComplement = "";
     const params = [pagination.size, pagination.page];
 
@@ -49,7 +49,7 @@ export default class PostRepositoryPostgreAdapter implements PostRepository {
     }
 
     const data = await this.db.query(
-      `SELECT * FROM public.post ${whereComplement} ORDER BY created_at DESC LIMIT $1 OFFSET (($2 - 1) * $1)`,
+      `SELECT * FROM public.quotes ${whereComplement} ORDER BY created_at DESC LIMIT $1 OFFSET (($2 - 1) * $1)`,
       params,
     );
 
@@ -60,7 +60,7 @@ export default class PostRepositoryPostgreAdapter implements PostRepository {
     userId: string,
     date: DateFilter,
     pagination: Pagination,
-  ): Promise<Post[]> {
+  ): Promise<Quote[]> {
     let whereComplement = "";
     const params = [userId, pagination.size, pagination.page];
 
@@ -81,26 +81,26 @@ export default class PostRepositoryPostgreAdapter implements PostRepository {
     }
 
     const data = await this.db.query(
-      `SELECT * FROM public.post WHERE user_id = $1 ${whereComplement} ORDER BY created_at DESC LIMIT $2 OFFSET (($3 - 1) * $2)`,
+      `SELECT * FROM public.quotes WHERE user_id = $1 ${whereComplement} ORDER BY created_at DESC LIMIT $2 OFFSET (($3 - 1) * $2)`,
       params,
     );
 
     return data;
   }
 
-  async getTotalPostsByUserId(userId: string): Promise<number> {
+  async getTotalByUserId(userId: string): Promise<number> {
     let data = await this.db.query(
-      "SELECT COUNT(id) as total_posts FROM public.post WHERE user_id = $1",
+      "SELECT COUNT(id) as total_quotes FROM public.quotes WHERE user_id = $1",
       [userId],
     );
 
     if (data.length > 0) [data] = data;
-    return data.total_posts;
+    return data.total_quotes;
   }
 
-  async getAll(pagination: Pagination): Promise<Post[]> {
+  async getAll(pagination: Pagination): Promise<Quote[]> {
     const data = await this.db.query(
-      `SELECT * FROM public.post ORDER BY created_at DESC LIMIT $1 OFFSET (($2 - 1) * $1)`,
+      `SELECT * FROM public.quotes ORDER BY created_at DESC LIMIT $1 OFFSET (($2 - 1) * $1)`,
       [pagination.size, pagination.page],
     );
 
