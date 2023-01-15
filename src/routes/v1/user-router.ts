@@ -1,64 +1,76 @@
 import { NextFunction, Request, Response, Router } from "express";
 import NodeCache from "node-cache";
-import PostgreAdapter from "../../infra/adapters/PostgreAdapter";
+
+import { database } from "../connection";
+import UserController from "../../controllers/UserController";
+import PostRepositoryPostgreAdapter from "../../infra/adapters/PostRepositoryPostgreAdapter";
 import UserRepositoryPostgreAdapter from "../../infra/adapters/UserRepositoryPostgreAdapter";
-import GetUserProfileUseCase from "../../usecases/GetUserProfileUseCase";
+import QuoteRepositoryPostgreAdapter from "../../infra/adapters/QuoteRepositoryPostgreAdapter";
 
 const userRouterV1 = Router();
+const controller = new UserController(
+  new PostRepositoryPostgreAdapter(database),
+  new UserRepositoryPostgreAdapter(database),
+  new QuoteRepositoryPostgreAdapter(database),
+);
 
 const cache = new NodeCache({ stdTTL: 10, checkperiod: 20 }); // Numbers in seconds
 
-const database = new PostgreAdapter();
-const userRepository = new UserRepositoryPostgreAdapter(database);
-
 const validateCache = (req: Request, res: Response, next: NextFunction) => {
-  const cacheKeys = {
-    UserProfileCache: `user|profile|${req.body.id}`,
-    UserByUsernameCache: `user|usename|${req.params.username}`,
-  };
+  if (cache.has(req.params.cacheKey)) {
+    const cacheData = cache.get(req.params.cacheKey);
+    console.log("cache", cacheData);
 
-  try {
-    if (cache.has(cacheKeys.UserProfileCache)) {
-      const cacheData = cache.get(cacheKeys.UserProfileCache);
-      console.log("cache", cacheData);
-
-      return res.send({ success: true, message: "Ok Data cached" });
-    }
-
-    if (cache.has(cacheKeys.UserByUsernameCache)) {
-      const cacheData = cache.get(cacheKeys.UserByUsernameCache);
-      console.log("cache", cacheData);
-
-      return res.send({ success: true, message: "Ok Data cached" });
-    }
-
-    return next();
-  } catch (error) {
-    console.log("Cache error ", error);
-    throw error;
+    return res.send({ success: true, message: "Ok Data cached", data: cacheData });
   }
+
+  return next();
 };
 
-userRouterV1.post("/v1/user/profile", validateCache, async (req: Request, res: Response) => {
-  console.log("body", req.body);
+userRouterV1.post(
+  "/v1/user/profile",
+  (req: Request, res: Response, next: NextFunction) => {
+    req.params.cacheKey = `user|profile|${req.body.user}`;
+    return next();
+  },
+  validateCache,
+  async (req: Request, res: Response) => {
+    try {
+      const returnData = await controller.getUserProfile(req.body.user);
+      cache.set(req.params.cacheKey, returnData);
 
-  const useCase = new GetUserProfileUseCase(userRepository);
-  const profile = await useCase.execute(req.body.user);
+      res.send({ success: true, message: "Ok", data: returnData });
+    } catch (error) {
+      let message = "Unknow error.";
+      if (error instanceof Error) message = error.message;
 
-  cache.set(`user|profile|${req.body.user}`, "cached value");
+      console.log(message);
+      res.status(500).send({ success: false, message });
+    }
+  },
+);
 
-  res.send({ success: true, message: "Ok", data: profile });
-});
+userRouterV1.get(
+  "/v1/user/:username",
+  (req: Request, res: Response, next: NextFunction) => {
+    req.params.cacheKey = `user|usename|${req.params.username}`;
+    return next();
+  },
+  validateCache,
+  async (req: Request, res: Response) => {
+    try {
+      const user = await controller.getUserData(req.params.username);
+      cache.set(req.params.cacheKey, user);
 
-userRouterV1.get("/v1/user/:username", validateCache, async (req: Request, res: Response) => {
-  console.log("params", req.params);
+      res.send({ success: true, message: "Ok", data: user });
+    } catch (error) {
+      let message = "Unknow error.";
+      if (error instanceof Error) message = error.message;
 
-  const user = await userRepository.getByUsername(req.params.username);
-  console.log(user);
-
-  cache.set(`user|usename|${req.params.username}`, `cached value: ${user}`);
-
-  res.send({ success: true, message: "Ok", data: user });
-});
+      console.log(message);
+      res.status(500).send({ success: false, message });
+    }
+  },
+);
 
 export { userRouterV1 };
