@@ -46,7 +46,7 @@ export default class CreatePostUseCase {
       { page: "1", size: "5" },
     );
 
-    if (posts.length + quotes.length === 5) {
+    if (posts && quotes && posts.length + quotes.length >= 5) {
       throw new Error("You reached the daily post limit (up to 5).");
     }
   }
@@ -61,14 +61,14 @@ export default class CreatePostUseCase {
       created_at: new Date().toDateString(),
     };
 
-    await this.postRepository.save(new Post(dataToSave));
+    return this.postRepository.save(new Post(dataToSave));
   }
 
   private async createRepost(userId: string, text: string, postId: string): Promise<void> {
     await this.validatePostData(userId, text);
 
     const post = await this.postRepository.getById(postId);
-    if (post.getRepost()) throw new Error("You cannot repost a reposted post.");
+    if (post && post.getRepost()) throw new Error("You cannot repost a reposted post.");
 
     const dataToSave: PostEntity = {
       id: randomUUID(),
@@ -79,6 +79,6 @@ export default class CreatePostUseCase {
       created_at: new Date().toDateString(),
     };
 
-    await this.postRepository.save(new Post(dataToSave));
+    return this.postRepository.save(new Post(dataToSave));
   }
 }

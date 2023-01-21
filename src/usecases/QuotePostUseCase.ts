@@ -38,7 +38,7 @@ export default class QuotePostUseCase {
     if (!postId) throw new Error("Post Id is required for this request.");
 
     const quote = await this.quoteRepository.getById(postId);
-    if (quote.getId()) throw new Error("You cannot quote a quoted post.");
+    if (quote && quote.getId()) throw new Error("You cannot quote a quoted post.");
 
     const date = new Date();
     const from = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()} 00:00:00`;
@@ -56,7 +56,7 @@ export default class QuotePostUseCase {
       { page: "1", size: "5" },
     );
 
-    if (posts.length + quotes.length === 5) {
+    if (posts && quotes && posts.length + quotes.length === 5) {
       throw new Error("You reached the daily post limit (up to 5).");
     }
   }
