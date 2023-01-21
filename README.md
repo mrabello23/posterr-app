@@ -89,6 +89,7 @@ These instructions will get this project up and running in your machine.
 - Use a high-level ORM;
 - Better use of Middlewares (validate cache, extract user infos);
 - Create an OAuth authentication layer;
+- Better use of projects design pattern;
 
 > Scaling up
 

@@ -14,8 +14,9 @@ export default class GetPostFeedUseCase {
     private readonly quoteRepository: QuoteRepository,
   ) {}
 
-  async execute(data: GetPostFeedRequestData): Promise<Feed> {
-    const { from, to, userId } = data;
+  async execute(data?: GetPostFeedRequestData): Promise<Feed> {
+    const { from, to, userId } = data || {};
+
     const FIRST_PAGE = 1;
     const POSTS_LIMIT = 10;
 

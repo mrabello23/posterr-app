@@ -5,6 +5,6 @@ export default {
   coverageProvider: "v8",
   preset: "ts-jest",
   testEnvironment: "node",
-  testPathIgnorePatterns: [],
-  coveragePathIgnorePatterns: [],
+  testPathIgnorePatterns: ["<rootDir>/node_modules/", "<rootDir>/src/envs/"],
+  coveragePathIgnorePatterns: ["<rootDir>/node_modules/", "<rootDir>/src/envs/"],
 };

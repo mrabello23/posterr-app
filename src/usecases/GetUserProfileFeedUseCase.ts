@@ -13,7 +13,7 @@ export default class GetUserProfileFeedUseCase {
   ) {}
 
   async execute(data: GetPostFeedRequestData): Promise<UserProfileFeed> {
-    const { userId } = data;
+    const { userId } = data || {};
 
     const FIRST_PAGE = 1;
     const POSTS_LIMIT = 5;
