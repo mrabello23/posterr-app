@@ -90,9 +90,11 @@ These instructions will get this project up and running in your machine.
 - Better use of Middlewares (validate cache, extract user infos);
 - Create an OAuth authentication layer;
 - Better use of projects design pattern;
+- Better reuse of objects;
 
 > Scaling up
 
 - Consider a cloud architecture with containers, external cofigurations, load ballance and scalling policies;
 - Consider a persistent cache layer, like Redis, for boost performance;
 - Consider an Api Gateway service with rate limit and throttling configurations;
+- Adopt modern tools (like ORM or service mesh) which can handle with concurrencies;
