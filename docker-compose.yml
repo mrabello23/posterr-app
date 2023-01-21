@@ -4,16 +4,18 @@ services:
   dbpostgres:
     image: postgres:14.5
     container_name: dbpostgres
+    restart: always
     ports:
       - "5432:5432"
+    expose:
+      - 5432
     volumes:
       - pgdata:/var/lib/postgresql/data/pgdata
       - ./.docker/pg_init_scripts:/docker-entrypoint-initdb.d
     environment:
       - POSTGRES_PASSWORD=passworddb
       - PGDATA=/var/lib/postgresql/data/pgdata
-    networks:
-      - ntwbridge
+    network_mode: bridge
   # nodejs:
   #   build:
   #     context: .
@@ -24,15 +26,12 @@ services:
   #     - "3000:3000"
   #   environment:
   #     - PORT=3000
-  #     - ENVIRONMENT=DEV
   #     - DB_CONFIG=postgres://postgres:passworddb@dbpostgres:5432/postgres
+  #   network_mode: bridge
+  #   links:
+  #     - dbpostgres
   #   depends_on:
   #     dbpostgres:
   #       condition: service_started
-  #   networks:
-  #     - ntwbridge
-networks:
-  ntwbridge:
-    driver: bridge
 volumes:
   pgdata:

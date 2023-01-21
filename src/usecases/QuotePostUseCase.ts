@@ -16,7 +16,7 @@ export default class QuotePostUseCase {
     private readonly postRepository: PostRepository,
   ) {}
 
-  async execute(data: { userId: string; text: string; postId: string }): Promise<void> {
+  async execute(data: CreatePostRequestData): Promise<void> {
     const { text, userId, postId } = data;
 
     await this.validateQuotePostData(data);
@@ -25,20 +25,17 @@ export default class QuotePostUseCase {
       id: randomUUID(),
       text,
       user_id: userId,
-      original_post_id: postId,
+      original_post_id: postId as string,
     };
 
     await this.quoteRepository.save(new Quote(dataToSave));
   }
 
-  private async validateQuotePostData(data: {
-    userId: string;
-    text: string;
-    postId: string;
-  }): Promise<void> {
+  private async validateQuotePostData(data: CreatePostRequestData): Promise<void> {
     const { text, userId, postId } = data;
 
     if (text.length > 777) throw new Error("Your Post is too long. Max 777 characters.");
+    if (!postId) throw new Error("Post Id is required for this request.");
 
     const quote = await this.quoteRepository.getById(postId);
     if (quote.getId()) throw new Error("You cannot quote a quoted post.");

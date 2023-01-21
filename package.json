@@ -1,5 +1,5 @@
 {
-  "name": "",
+  "name": "social-media-app",
   "version": "1.0.0",
   "description": "",
   "main": "server.ts",
@@ -41,6 +41,6 @@
     "pg-promise": "10.12.0"
   },
   "keywords": [],
-  "author": "Marcel Oliveira",
+  "author": "Marcel de Oliveira",
   "license": "ISC"
 }
