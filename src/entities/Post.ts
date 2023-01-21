@@ -6,7 +6,7 @@ export type PostEntity = {
   user_id: string;
   repost?: boolean;
   original_post_id?: string;
-  created_at: string;
+  created_at?: string;
 };
 
 export default class Post {
@@ -15,7 +15,7 @@ export default class Post {
   private userId: string;
   private originalPostId: string | undefined;
   private repost: boolean | undefined;
-  private createdAt: string;
+  private createdAt: string | undefined;
 
   constructor(data: PostEntity) {
     const { id, text, user_id, repost, created_at, original_post_id } = data;

@@ -2,12 +2,13 @@ FROM node:16-alpine
 
 WORKDIR /usr/app
 
-COPY ./app/package.json .
-COPY ./app/.npmrc .
-COPY ./app/babel.config.js .
-RUN npm install
+COPY ./package.json .
+COPY ./babel.config.js .
 
-COPY ./app/src ./src
+ENV NODE_ENV production
+RUN npm install --production
+
+COPY ./src ./src
 RUN npm run build
 
 EXPOSE 3000
