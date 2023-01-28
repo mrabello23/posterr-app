@@ -18,6 +18,9 @@ export default class CreatePostUseCase {
   async execute(data: CreatePostRequestData): Promise<void> {
     const { type, text, userId, postId } = data;
 
+    if (!text) throw new Error("Post text not found.");
+    if (!userId) throw new Error("User Id not found.");
+
     if (type === PostType.POST) {
       await this.createPost(userId, text);
       return;
