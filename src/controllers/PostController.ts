@@ -33,7 +33,7 @@ export default class PostController {
     const { userId, text, postId } = data;
 
     const createPostUseCase = new QuotePostUseCase(this.quoteRepository, this.postRepository);
-    await createPostUseCase.execute({ text, userId, postId });
+    await createPostUseCase.execute({ text, userId, postId, type: PostType.QUOTEPOST });
   }
 
   async getHomepage(data: GetPostFeedRequestData): Promise<Feed> {
