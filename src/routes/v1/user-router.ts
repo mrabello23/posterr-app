@@ -36,16 +36,20 @@ userRouterV1.post(
   validateCache,
   async (req: Request, res: Response) => {
     try {
+      if (req.body.user) {
+        return res.status(500).send({ success: false, message: 'Param "user" not found.' });
+      }
+
       const returnData = await controller.getUserProfile(req.body.user);
       cache.set(req.params.cacheKey, returnData);
 
-      res.send({ success: true, message: "Ok", data: returnData });
+      return res.send({ success: true, message: "Ok", data: returnData });
     } catch (error) {
       let message = "Unknow error.";
       if (error instanceof Error) message = error.message;
 
       console.log(message);
-      res.status(500).send({ success: false, message });
+      return res.status(500).send({ success: false, message });
     }
   },
 );
@@ -59,16 +63,20 @@ userRouterV1.get(
   validateCache,
   async (req: Request, res: Response) => {
     try {
+      if (req.params.username) {
+        return res.status(500).send({ success: false, message: 'Param "username" not found.' });
+      }
+
       const user = await controller.getUserData(req.params.username);
       cache.set(req.params.cacheKey, user);
 
-      res.send({ success: true, message: "Ok", data: user });
+      return res.send({ success: true, message: "Ok", data: user });
     } catch (error) {
       let message = "Unknow error.";
       if (error instanceof Error) message = error.message;
 
       console.log(message);
-      res.status(500).send({ success: false, message });
+      return res.status(500).send({ success: false, message });
     }
   },
 );

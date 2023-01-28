@@ -18,6 +18,9 @@ export default class CreatePostUseCase {
   async execute(data: CreatePostRequestData): Promise<void> {
     const { type, text, userId, postId } = data;
 
+    if (!text) throw new Error("Post text not found.");
+    if (!userId) throw new Error("User Id not found.");
+
     if (type === PostType.POST) {
       await this.createPost(userId, text);
       return;
@@ -31,8 +34,8 @@ export default class CreatePostUseCase {
     if (text.length > 777) throw new Error("Your Post is too long. Max 777 characters.");
 
     const date = new Date();
-    const from = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()} 00:00:00`;
-    const to = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()} 23:59:59`;
+    const from = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} 00:00:00`;
+    const to = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} 23:59:59`;
 
     const posts = await this.postRepository.getAllByUserIdAndCreatedAt(
       userId,

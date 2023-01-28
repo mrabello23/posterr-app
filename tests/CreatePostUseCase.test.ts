@@ -1,5 +1,5 @@
-import PostgreAdapter from "../src/infra/adapters/PostgreAdapter";
 import PostRepositoryPostgreAdapter from "../src/infra/adapters/PostRepositoryPostgreAdapter";
+import PostgreAdapter from "../src/infra/adapters/PostgreAdapter";
 import QuoteRepositoryPostgreAdapter from "../src/infra/adapters/QuoteRepositoryPostgreAdapter";
 import CreatePostUseCase from "../src/usecases/CreatePostUseCase";
 import Post, { PostType } from "../src/entities/Post";
@@ -56,10 +56,10 @@ describe("CreatePostUseCase Test", () => {
       type: PostType.POST,
     };
 
-    expect(PostRepositoryMock.save).toBeCalledTimes(0);
     await expect(usecase.execute(requestData)).rejects.toThrow(
       "Your Post is too long. Max 777 characters.",
     );
+    expect(PostRepositoryMock.save).toBeCalledTimes(0);
   });
 
   it("Should throw error if a user try to Post more than 5 times on same day", async () => {
@@ -114,10 +114,10 @@ describe("CreatePostUseCase Test", () => {
       type: PostType.POST,
     };
 
-    expect(PostRepositoryMock.save).toBeCalledTimes(0);
     await expect(usecase.execute(requestData)).rejects.toThrow(
       "You reached the daily post limit (up to 5).",
     );
+    expect(PostRepositoryMock.save).toBeCalledTimes(0);
   });
 
   it("Should throw error if a user try to Repost a reposted post", async () => {
@@ -139,11 +139,10 @@ describe("CreatePostUseCase Test", () => {
       type: PostType.REPOST,
     };
 
-    expect(PostRepositoryMock.save).toBeCalledTimes(0);
-
     await expect(usecase.execute(requestData)).rejects.toThrow(
       "You cannot repost a reposted post.",
     );
+    expect(PostRepositoryMock.save).toBeCalledTimes(0);
   });
 
   it("Should throw error if a user try to Repost whitout a post_id set", async () => {
@@ -154,7 +153,25 @@ describe("CreatePostUseCase Test", () => {
       type: PostType.REPOST,
     };
 
-    expect(PostRepositoryMock.save).toBeCalledTimes(0);
     await expect(usecase.execute(requestData)).rejects.toThrow("Original post id not found.");
+    expect(PostRepositoryMock.save).toBeCalledTimes(0);
+  });
+
+  it("Should throw error if text or user_id not present", async () => {
+    const usecase = new CreatePostUseCase(PostRepositoryMock, QuoteRepositoryMock);
+    const requestData = {
+      text: "Create Post UseCase - Post text",
+      userId: "",
+      type: PostType.REPOST,
+    };
+
+    await expect(usecase.execute(requestData)).rejects.toThrow("User Id not found.");
+    expect(PostRepositoryMock.save).toBeCalledTimes(0);
+
+    requestData.userId = "user_id";
+    requestData.text = "";
+
+    await expect(usecase.execute(requestData)).rejects.toThrow("Post text not found.");
+    expect(PostRepositoryMock.save).toBeCalledTimes(0);
   });
 });

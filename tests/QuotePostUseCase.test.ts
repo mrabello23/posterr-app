@@ -102,10 +102,10 @@ describe("QuotePostUseCase Test", () => {
       type: PostType.QUOTEPOST,
     };
 
-    expect(QuoteRepositoryMock.save).toBeCalledTimes(0);
     await expect(usecase.execute(requestData)).rejects.toThrow(
       "You reached the daily post limit (up to 5).",
     );
+    expect(QuoteRepositoryMock.save).toBeCalledTimes(0);
   });
 
   it("Should throw error if a user try to Quote a quoted post", async () => {
@@ -127,9 +127,8 @@ describe("QuotePostUseCase Test", () => {
       type: PostType.QUOTEPOST,
     };
 
-    expect(QuoteRepositoryMock.save).toBeCalledTimes(0);
-
     await expect(usecase.execute(requestData)).rejects.toThrow("You cannot quote a quoted post.");
+    expect(QuoteRepositoryMock.save).toBeCalledTimes(0);
   });
 
   it("Should throw error if a user try to Quote Post whitout a post_id set", async () => {
@@ -140,9 +139,27 @@ describe("QuotePostUseCase Test", () => {
       type: PostType.QUOTEPOST,
     };
 
-    expect(QuoteRepositoryMock.save).toBeCalledTimes(0);
     await expect(usecase.execute(requestData)).rejects.toThrow(
       "Post Id is required for this request.",
     );
+    expect(QuoteRepositoryMock.save).toBeCalledTimes(0);
+  });
+
+  it("Should throw error if text or user_id not present", async () => {
+    const usecase = new QuotePostUseCase(QuoteRepositoryMock, PostRepositoryMock);
+    const requestData = {
+      text: "Create Post UseCase - Post text",
+      userId: "",
+      type: PostType.QUOTEPOST,
+    };
+
+    await expect(usecase.execute(requestData)).rejects.toThrow("User Id not found.");
+    expect(QuoteRepositoryMock.save).toBeCalledTimes(0);
+
+    requestData.userId = "user_id";
+    requestData.text = "";
+
+    await expect(usecase.execute(requestData)).rejects.toThrow("Post text not found.");
+    expect(QuoteRepositoryMock.save).toBeCalledTimes(0);
   });
 });

@@ -38,64 +38,100 @@ postRouterV1.post(
 
       cache.set(req.params.cacheKey, returnData);
 
-      res.send({ success: true, message: "Ok", data: returnData });
+      return res.send({ success: true, message: "Ok", data: returnData });
     } catch (error) {
       let message = "Unknow error.";
       if (error instanceof Error) message = error.message;
 
       console.log(message);
-      res.status(500).send({ success: false, message });
+      return res.status(500).send({ success: false, message });
     }
   },
 );
 
 postRouterV1.post("/v1/post", async (req: Request, res: Response) => {
   try {
+    if (req.body.user) {
+      return res.status(500).send({ success: false, message: 'Param "user" not found.' });
+    }
+
+    if (req.body.text) {
+      return res.status(500).send({ success: false, message: 'Param "text" not found.' });
+    }
+
     await controller.doPost({ userId: req.body.user, text: req.body.text });
 
-    res.send({ success: true, message: "Ok" });
+    return res.send({ success: true, message: "Ok" });
   } catch (error) {
     let message = "Unknow error.";
     if (error instanceof Error) message = error.message;
 
     console.log(message);
-    res.status(500).send({ success: false, message });
+    return res.status(500).send({ success: false, message });
   }
 });
 
 postRouterV1.post("/v1/repost", async (req: Request, res: Response) => {
   try {
+    if (req.body.user) {
+      return res.status(500).send({ success: false, message: 'Param "user" not found.' });
+    }
+
+    if (req.body.text) {
+      return res.status(500).send({ success: false, message: 'Param "text" not found.' });
+    }
+
+    if (req.body.original_post_id) {
+      return res
+        .status(500)
+        .send({ success: false, message: 'Param "original_post_id" not found.' });
+    }
+
     await controller.doRepost({
       userId: req.body.user,
       text: req.body.text,
       postId: req.body.original_post_id,
     });
 
-    res.send({ success: true, message: "Ok" });
+    return res.send({ success: true, message: "Ok" });
   } catch (error) {
     let message = "Unknow error.";
     if (error instanceof Error) message = error.message;
 
     console.log(message);
-    res.status(500).send({ success: false, message });
+    return res.status(500).send({ success: false, message });
   }
 });
 
 postRouterV1.post("/v1/quote-post", async (req: Request, res: Response) => {
   try {
+    if (req.body.user) {
+      return res.status(500).send({ success: false, message: 'Param "user" not found.' });
+    }
+
+    if (req.body.text) {
+      return res.status(500).send({ success: false, message: 'Param "text" not found.' });
+    }
+
+    if (req.body.original_post_id) {
+      return res
+        .status(500)
+        .send({ success: false, message: 'Param "original_post_id" not found.' });
+    }
+
     await controller.doQuotePost({
       userId: req.body.user,
       text: req.body.text,
       postId: req.body.original_post_id,
     });
 
-    res.send({ success: true, message: "Ok" });
+    return res.send({ success: true, message: "Ok" });
   } catch (error) {
     let message = "Unknow error.";
     if (error instanceof Error) message = error.message;
 
     console.log(message);
-    res.status(500).send({ success: false, message });
+    return res.status(500).send({ success: false, message });
   }
 });
 

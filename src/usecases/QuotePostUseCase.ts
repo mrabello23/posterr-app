@@ -19,6 +19,9 @@ export default class QuotePostUseCase {
   async execute(data: CreatePostRequestData): Promise<void> {
     const { text, userId, postId } = data;
 
+    if (!text) throw new Error("Post text not found.");
+    if (!userId) throw new Error("User Id not found.");
+
     await this.validateQuotePostData(data);
 
     const dataToSave: QuoteEntity = {
