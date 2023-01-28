@@ -36,6 +36,10 @@ userRouterV1.post(
   validateCache,
   async (req: Request, res: Response) => {
     try {
+      if (req.body.user) {
+        return res.status(500).send({ success: false, message: 'Param "user" not found.' });
+      }
+
       const returnData = await controller.getUserProfile(req.body.user);
       cache.set(req.params.cacheKey, returnData);
 
@@ -59,6 +63,10 @@ userRouterV1.get(
   validateCache,
   async (req: Request, res: Response) => {
     try {
+      if (req.body.username) {
+        return res.status(500).send({ success: false, message: 'Param "username" not found.' });
+      }
+
       const user = await controller.getUserData(req.params.username);
       cache.set(req.params.cacheKey, user);
 

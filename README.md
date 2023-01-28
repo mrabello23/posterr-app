@@ -28,6 +28,15 @@
 
 ##### <span style="font-weight:bold;"> \* Insomnia Collection with endpoint and parameter details inside /docs folder </span>
 
+> User test data
+
+| Name   | User Id                              | Username | Email           |
+| ------ | ------------------------------------ | -------- | --------------- |
+| User 1 | efe38133-df4c-4ab5-b9c2-d585931eb946 | usr1abc  | user1@email.com |
+| User 2 | ceddaba1-fccb-4e43-a5da-5daa7e7b4b23 | usr2abc  | user2@email.com |
+| User 3 | ba071706-dcc0-446c-b089-f190962af5b6 | usr3abc  | user3@email.com |
+| User 4 | b5ea93f0-30b0-4d23-a805-9fb299ef6c8a | usr4abc  | user4@email.com |
+
 ## Getting Started
 
 These instructions will get this project up and running in your machine.
@@ -81,9 +90,9 @@ These instructions will get this project up and running in your machine.
   $ npm run test
   ```
 
-### Critique
+### Improvements
 
-> Possible Improvements
+> General
 
 - More cenarios for unit and integration tests;
 - Use a high-level ORM;

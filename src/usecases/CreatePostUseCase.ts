@@ -31,8 +31,8 @@ export default class CreatePostUseCase {
     if (text.length > 777) throw new Error("Your Post is too long. Max 777 characters.");
 
     const date = new Date();
-    const from = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()} 00:00:00`;
-    const to = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()} 23:59:59`;
+    const from = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} 00:00:00`;
+    const to = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} 23:59:59`;
 
     const posts = await this.postRepository.getAllByUserIdAndCreatedAt(
       userId,
