@@ -36,24 +36,27 @@ export default class PostRepositoryPostgreAdapter implements PostRepository {
       whereComplement = ` WHERE created_at >= $3 AND created_at <= $4`;
       params.push(date.from);
       params.push(date.to);
-    } else {
-      if (date.from) {
-        whereComplement = ` WHERE created_at >= $3`;
-        params.push(date.from);
-      }
 
-      if (date.to) {
-        whereComplement = ` WHERE created_at <= $3`;
-        params.push(date.to);
-      }
+      return this.db.query(
+        `SELECT * FROM public.post ${whereComplement} ORDER BY created_at DESC LIMIT $1 OFFSET (($2 - 1) * $1)`,
+        params,
+      );
     }
 
-    const data = await this.db.query(
+    if (date.from) {
+      whereComplement = ` WHERE created_at >= $3`;
+      params.push(date.from);
+    }
+
+    if (date.to) {
+      whereComplement = ` WHERE created_at <= $3`;
+      params.push(date.to);
+    }
+
+    return this.db.query(
       `SELECT * FROM public.post ${whereComplement} ORDER BY created_at DESC LIMIT $1 OFFSET (($2 - 1) * $1)`,
       params,
     );
-
-    return data;
   }
 
   async getAllByUserIdAndCreatedAt(
@@ -68,24 +71,27 @@ export default class PostRepositoryPostgreAdapter implements PostRepository {
       whereComplement = ` AND created_at >= $4 AND created_at <= $5`;
       params.push(date.from);
       params.push(date.to);
-    } else {
-      if (date.from) {
-        whereComplement = ` AND created_at >= $4`;
-        params.push(date.from);
-      }
 
-      if (date.to) {
-        whereComplement = ` AND created_at <= $4`;
-        params.push(date.to);
-      }
+      return this.db.query(
+        `SELECT * FROM public.post WHERE user_id = $1 ${whereComplement} ORDER BY created_at DESC LIMIT $2 OFFSET (($3 - 1) * $2)`,
+        params,
+      );
     }
 
-    const data = await this.db.query(
+    if (date.from) {
+      whereComplement = ` AND created_at >= $4`;
+      params.push(date.from);
+    }
+
+    if (date.to) {
+      whereComplement = ` AND created_at <= $4`;
+      params.push(date.to);
+    }
+
+    return this.db.query(
       `SELECT * FROM public.post WHERE user_id = $1 ${whereComplement} ORDER BY created_at DESC LIMIT $2 OFFSET (($3 - 1) * $2)`,
       params,
     );
-
-    return data;
   }
 
   async getTotalPostsByUserId(userId: string): Promise<number> {

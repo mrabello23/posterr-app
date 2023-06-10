@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 
-import Post, { CreatePostRequestData, PostEntity, PostType } from "../entities/Post";
+import Post, { CreatePostRequestData, PostType } from "../entities/Post";
 import PostRepository from "../infra/repositories/PostRepository";
 import QuoteRepository from "../infra/repositories/QuoteRepository";
 
@@ -18,21 +18,15 @@ export default class CreatePostUseCase {
   async execute(data: CreatePostRequestData): Promise<void> {
     const { type, text, userId, postId } = data;
 
-    if (!text) throw new Error("Post text not found.");
-    if (!userId) throw new Error("User Id not found.");
-
     if (type === PostType.POST) {
       await this.createPost(userId, text);
       return;
     }
 
-    if (!postId) throw new Error("Original post id not found.");
-    await this.createRepost(userId, text, postId);
+    await this.createRepost(userId, text, postId!);
   }
 
-  private async validatePostData(userId: string, text: string): Promise<void> {
-    if (text.length > 777) throw new Error("Your Post is too long. Max 777 characters.");
-
+  private async validatePostDailyLimit(userId: string): Promise<void> {
     const date = new Date();
     const from = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} 00:00:00`;
     const to = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} 23:59:59`;
@@ -55,33 +49,33 @@ export default class CreatePostUseCase {
   }
 
   private async createPost(userId: string, text: string): Promise<void> {
-    await this.validatePostData(userId, text);
+    await this.validatePostDailyLimit(userId);
 
-    const dataToSave: PostEntity = {
+    const postEntity = new Post({
       id: randomUUID(),
       text,
       user_id: userId,
       created_at: new Date().toDateString(),
-    };
+    });
 
-    return this.postRepository.save(new Post(dataToSave));
+    return this.postRepository.save(postEntity);
   }
 
   private async createRepost(userId: string, text: string, postId: string): Promise<void> {
-    await this.validatePostData(userId, text);
+    await this.validatePostDailyLimit(userId);
 
-    const post = await this.postRepository.getById(postId);
-    if (post && post.getRepost()) throw new Error("You cannot repost a reposted post.");
-
-    const dataToSave: PostEntity = {
+    const postEntity = new Post({
       id: randomUUID(),
       text,
       user_id: userId,
       repost: true,
       original_post_id: postId,
       created_at: new Date().toDateString(),
-    };
+    });
 
-    return this.postRepository.save(new Post(dataToSave));
+    const post = await this.postRepository.getById(postId);
+    if (post && post.getRepost()) throw new Error("You cannot repost a reposted Post.");
+
+    return this.postRepository.save(postEntity);
   }
 }

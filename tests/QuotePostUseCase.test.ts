@@ -45,7 +45,7 @@ describe("QuotePostUseCase Test", () => {
 
     expect(QuoteRepositoryMock.save).toBeCalledTimes(0);
     await expect(usecase.execute(requestData)).rejects.toThrow(
-      "Your Post is too long. Max 777 characters.",
+      "Post text is too long. Max 777 characters.",
     );
   });
 
@@ -70,6 +70,7 @@ describe("QuotePostUseCase Test", () => {
         text: "Create Post UseCase",
         user_id: "user_id",
         repost: true,
+        original_post_id: "original_post_id",
         created_at: "2023-01-01",
       }),
     ];
@@ -139,9 +140,7 @@ describe("QuotePostUseCase Test", () => {
       type: PostType.QUOTEPOST,
     };
 
-    await expect(usecase.execute(requestData)).rejects.toThrow(
-      "Post Id is required for this request.",
-    );
+    await expect(usecase.execute(requestData)).rejects.toThrow("Post Id is required for Repost.");
     expect(QuoteRepositoryMock.save).toBeCalledTimes(0);
   });
 
@@ -150,16 +149,17 @@ describe("QuotePostUseCase Test", () => {
     const requestData = {
       text: "Create Post UseCase - Post text",
       userId: "",
+      postId: "post_id",
       type: PostType.QUOTEPOST,
     };
 
-    await expect(usecase.execute(requestData)).rejects.toThrow("User Id not found.");
+    await expect(usecase.execute(requestData)).rejects.toThrow("User Id is required.");
     expect(QuoteRepositoryMock.save).toBeCalledTimes(0);
 
     requestData.userId = "user_id";
     requestData.text = "";
 
-    await expect(usecase.execute(requestData)).rejects.toThrow("Post text not found.");
+    await expect(usecase.execute(requestData)).rejects.toThrow("Post text is required.");
     expect(QuoteRepositoryMock.save).toBeCalledTimes(0);
   });
 });
