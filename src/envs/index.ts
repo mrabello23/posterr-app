@@ -1,8 +1,6 @@
 import * as dotenv from "dotenv";
 
-if (process.env.ENVIRONMENT === "LOCAL" || process.env.NODE_ENV !== "production") {
-  dotenv.config();
-}
+dotenv.config();
 
 export const { ENVIRONMENT, DB_CONNECTION, PORT } = {
   ENVIRONMENT: process.env.ENVIRONMENT || "",

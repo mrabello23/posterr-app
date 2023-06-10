@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 
 import { CreatePostRequestData } from "../entities/Post";
-import Quote, { QuoteEntity } from "../entities/Quote";
+import Quote from "../entities/Quote";
 import PostRepository from "../infra/repositories/PostRepository";
 import QuoteRepository from "../infra/repositories/QuoteRepository";
 
@@ -19,28 +19,23 @@ export default class QuotePostUseCase {
   async execute(data: CreatePostRequestData): Promise<void> {
     const { text, userId, postId } = data;
 
-    if (!text) throw new Error("Post text not found.");
-    if (!userId) throw new Error("User Id not found.");
-
-    await this.validateQuotePostData(data);
-
-    const dataToSave: QuoteEntity = {
+    const quoteEntity = new Quote({
       id: randomUUID(),
       text,
       user_id: userId,
       original_post_id: postId as string,
-    };
+    });
 
-    await this.quoteRepository.save(new Quote(dataToSave));
+    await this.validateQuotePostDailyLimit(data);
+
+    await this.quoteRepository.save(quoteEntity);
   }
 
-  private async validateQuotePostData(data: CreatePostRequestData): Promise<void> {
-    const { text, userId, postId } = data;
+  private async validateQuotePostDailyLimit(data: CreatePostRequestData): Promise<void> {
+    const { userId, postId } = data;
 
-    if (text.length > 777) throw new Error("Your Post is too long. Max 777 characters.");
-    if (!postId) throw new Error("Post Id is required for this request.");
+    const quote = await this.quoteRepository.getById(postId!);
 
-    const quote = await this.quoteRepository.getById(postId);
     if (quote && quote.getId()) throw new Error("You cannot quote a quoted post.");
 
     const date = new Date();

@@ -20,6 +20,11 @@ export default class Post {
   constructor(data: PostEntity) {
     const { id, text, user_id, repost, created_at, original_post_id } = data;
 
+    if (!text) throw new Error("Post text is required.");
+    if (!user_id) throw new Error("User Id is required.");
+    if (text.length > 777) throw new Error("Post text is too long. Max 777 characters.");
+    if (repost && !original_post_id) throw new Error("Original post is required for Repost.");
+
     this.id = id;
     this.text = text;
     this.userId = user_id;

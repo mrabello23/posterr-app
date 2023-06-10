@@ -17,6 +17,7 @@
     "max-len": "warn",
     "no-underscore-dangle": "warn",
     "no-useless-constructor": "warn",
+    "@typescript-eslint/no-non-null-assertion": "off",
     "quotes": "off",
     "linebreak-style": "off",
     "no-console": "off",
